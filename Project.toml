@@ -1,0 +1,6 @@
+[deps]
+DomainSets = "5b8099bc-c8ec-5219-889f-1d9e522a28bf"
+MethodOfLines = "94925ecb-adb7-4558-8ed8-f975c56a0bf4"
+ModelingToolkit = "961ee093-0014-501f-94e3-6117800e7a78"
+OrdinaryDiffEq = "1dea7af3-3e70-54e6-95c3-0bf5283fa5ed"
+Pesto = "f3a6be2d-a68d-4ec3-9269-e9777039d639"
