@@ -109,6 +109,44 @@ D_initial = [1.0 for _ in 1:n_discretizations]
 sol = foo(prob, t0, t1, E_initial, D_initial)
 
 
+## sanity check
+
+K = 100
+prob, λs = ode_problem(μ, σ, η, 0.00001, 30.0; n = K)
+
+## one solve
+u0 = vcat(zeros(K), ones(K))
+prob1 = remake(prob, tspan = (0.0, 20.0), u0 = u0)
+sol1 = OrdinaryDiffEq.solve(prob1, Tsit5(), save_everystep=false, 
+                           isoutofdomain = notneg, reltol = 1e-8)
+D, E = values(sol1.u)
+D = D[:,end]
+E = E[:,end]
+res1 = vcat(E, D)
+
+## two solves
+## a) from 0.0 to 1.0
+u0 = vcat(zeros(K), ones(K))
+prob2 = remake(prob, tspan = (0.0, 10.0), u0 = u0)
+sol2 = OrdinaryDiffEq.solve(prob2, Tsit5(), save_everystep=false, 
+                           isoutofdomain = notneg, reltol = 1e-8)
+D, E = values(sol2.u)
+D = D[:,end]
+E = E[:,end]
+res2 = vcat(E, D)
+
+
+## b) from 0.0 to 1.0
+prob3 = remake(prob, tspan = (10.0, 20.0), u0 = res2)
+sol3 = OrdinaryDiffEq.solve(prob3, Tsit5(), save_everystep=false, 
+                           isoutofdomain = notneg, reltol = 1e-8)
+D, E = values(sol3.u)
+D = D[:,end]
+E = E[:,end]
+res3 = vcat(E, D)
+
+
+
 using Pesto
 
 
@@ -227,43 +265,6 @@ function logl_po(edge_index, prob, data::SSEdata, descendants, Ntip, K, λs)
 
     return(u, sf)
 end
-
-## sanity check
-
-K = 100
-prob, λs = ode_problem(μ, σ, η, 0.00001, 30.0; n = K)
-
-## one solve
-u0 = vcat(zeros(K), ones(K))
-prob1 = remake(prob, tspan = (0.0, 20.0), u0 = u0)
-sol1 = OrdinaryDiffEq.solve(prob1, Tsit5(), save_everystep=false, 
-                           isoutofdomain = notneg, reltol = 1e-8)
-D, E = values(sol1.u)
-D = D[:,end]
-E = E[:,end]
-res1 = vcat(E, D)
-
-## two solves
-## a) from 0.0 to 1.0
-u0 = vcat(zeros(K), ones(K))
-prob2 = remake(prob, tspan = (0.0, 10.0), u0 = u0)
-sol2 = OrdinaryDiffEq.solve(prob2, Tsit5(), save_everystep=false, 
-                           isoutofdomain = notneg, reltol = 1e-8)
-D, E = values(sol2.u)
-D = D[:,end]
-E = E[:,end]
-res2 = vcat(E, D)
-
-
-## b) from 0.0 to 1.0
-prob3 = remake(prob, tspan = (10.0, 20.0), u0 = res2)
-sol3 = OrdinaryDiffEq.solve(prob3, Tsit5(), save_everystep=false, 
-                           isoutofdomain = notneg, reltol = 1e-8)
-D, E = values(sol3.u)
-D = D[:,end]
-E = E[:,end]
-res3 = vcat(E, D)
-
 
 
 tree = readtree(Pesto.path("primates.tre"))
